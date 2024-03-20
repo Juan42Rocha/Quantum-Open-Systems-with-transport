@@ -1,0 +1,152 @@
+using LinearAlgebra
+using Random
+using Plots
+using Distributions
+using Printf
+
+#
+# Crea matriz tridiagonal 
+#
+#
+function  GeneraH(N,eps,gamma)
+
+  H = zeros(N,N)
+
+  for i in 2:N;
+    H[i,i-1] = gamma;
+    H[i,i]   = eps/2;
+  end
+  H = H + H' ;
+  H[1,1] = eps;
+  return H
+end
+
+#funcion dos para decoerencias
+function  Sigmadecore(N,nu)
+
+  H = zeros(Complex,N,N);
+
+  for i in 1:N;
+    H[i,i]   =  -im *nu;
+  end
+  return H
+end
+
+function GreenFun(E,H,SIGMA)
+  G = inv(E-H-SIGMA);
+  return G
+end
+
+function eye(n)
+  return Matrix(I,n,n)
+end
+
+function transmision_etavar_rand(E,N,dcor)
+
+    #Si quieres distribucion normal
+    d=Normal(0,2);
+
+    eps=Diagonal(rand(d,N));
+    #eps=Diagonal(rand(N));
+
+    eta=0.9999*((E/2) - im*sqrt(1 - ((E/2)^2)));
+    #eta = 1im*0.01;
+
+    Id=eye(N);
+    Sigs = zeros(N,N);
+    Sigd = zeros(N,N);
+    Sigs[1,1] = 1;
+    Sigd[N,N] = 1;
+    Mtau = zeros(N,N);
+    
+    G = GreenFun(E*Id, GeneraH(N,0,1)+Sigmadecore(N,dcor),eps+eta*(Sigs+Sigd));
+    TbS =  Mat_TransmisionS(eta,1im*dcor,G,1,N);
+    TDa =  Mat_TransmisionS(eta,1im*dcor,G,N,N);
+  
+    if dcor != 0 ;
+      Mtau = Mat_Tau(eta,1im*dcor,G,N);
+      invtau = inv(Mtau);
+  # return real(4*tr(imag.(eta*Sigs)*G*imag.(eta*Sigd)* G' ) )
+      temp = TDa'*invtau*TbS
+      return Calcula_transmision(eta,eta,G,1,N) + temp[1,1]; 
+    else
+      return Calcula_transmision(eta,eta,G,1,N) # + temp[1,1]; 
+    end
+end
+
+
+function Calcula_transmision(eta,dcor,FGreen,i,j)
+  #println(eta,"  " ,dcor," ",abs(FGreen[i,j])," ")
+  return 4*imag.(eta)*imag.(dcor)*abs(FGreen[i,j])^2
+end
+
+function Calcula_transmisionMat(eta,dcor,FGreen,i,j)
+  n = size(FGreen,1)
+  aux1 = zeros(n,n)
+  aux2 = zeros(n,n)
+  aux1[i,i] = imag(eta)
+  aux2[j,j] = imag(dcor)
+
+  return 4*real(tr(aux1*FGreen*aux2*FGreen') )
+end
+
+
+function Mat_TransmisionS(eta,decor,FGreen,k,N)
+  T = zeros(N,1);
+  for i in 1:N
+      T[i,1] = Calcula_transmision(eta,decor,FGreen,k,i);
+  end
+  return T
+end
+
+function Mat_TransmisionD(eta,decor,FGreen,k,N)
+  T = zeros(N,1);
+  for i in 1:N
+      T[i,1] = Calcula_transmision(decor,eta,FGreen,i,k);
+  end
+  return T
+end
+
+function Mat_Tau(eta,dcor,FGreen,N)
+  Mtau = zeros(N,N);
+  for al in 1:N
+    for be in al:N
+      if al==be;
+        Mtau[al,al] = diagonalTau(al,eta,dcor,FGreen,N);
+        #println(Mtau[al,al])
+      else 
+        Mtau[al,be] = -Calcula_transmision(dcor,dcor,FGreen,al,be);
+        Mtau[be,al] = -Calcula_transmision(dcor,dcor,FGreen,be,al);
+      end
+    end
+  end
+
+  return Mtau;
+
+end
+
+function diagonalTau(al,eta,dcor,FGreen,N)
+  val = 0;
+
+  for i in 1:N;
+    if i != al ;
+      val = val +Calcula_transmision(dcor,dcor,FGreen,al,i)
+    end
+  end
+  val = val + Calcula_transmision(eta,dcor,FGreen,al,1)
+  val = val + Calcula_transmision(eta,dcor,FGreen,al,N)
+  return val
+
+
+end
+
+
+function Promedio_transmision_cerca_0(Nr,N,dcor)
+    T=0.0;
+    
+    for i in 1:1:Nr
+        T=T+ transmision_etavar_rand(0.1,N,dcor)
+    end
+    
+   return T/Nr
+end

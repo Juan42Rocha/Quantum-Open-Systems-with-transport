@@ -44,7 +44,7 @@ end
 function transmision_etavar_rand(E,N,dcor)
 
     #Si quieres distribucion normal
-    d=Normal(0,2);
+    d=Normal(0,1);
 
     eps=Diagonal(rand(d,N));
     #eps=Diagonal(rand(N));
@@ -67,7 +67,7 @@ function transmision_etavar_rand(E,N,dcor)
       Mtau = Mat_Tau(eta,1im*dcor,G,N);
       invtau = inv(Mtau);
   # return real(4*tr(imag.(eta*Sigs)*G*imag.(eta*Sigd)* G' ) )
-      temp = TDa'*invtau*TbS
+      temp = TDa'*invtau*TbS;
       return Calcula_transmision(eta,eta,G,1,N) + temp[1,1]; 
     else
       return Calcula_transmision(eta,eta,G,1,N) # + temp[1,1]; 
@@ -145,7 +145,7 @@ function Promedio_transmision_cerca_0(Nr,N,dcor)
     T=0.0;
     
     for i in 1:1:Nr
-        T=T+ transmision_etavar_rand(0.1,N,dcor)
+        T=T+ transmision_etavar_rand(0.00001,N,dcor)
     end
     
    return T/Nr

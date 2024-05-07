@@ -3,9 +3,6 @@ using Random
 #using Plots
 using Distributions
 using Printf
-#
-# ESTE ARCHIVO DE UFNCIONES ESTA REVISADO Y VALIDODAO COMPARAO CON EL DE ADRIAN
-#
 
 #
 # Crea matriz tridiagonal 
@@ -13,13 +10,13 @@ using Printf
 #
 function  GeneraH(N,eps,gamma)
 
-  H = zeros(N,N)
+  H = zeros(Complex,N,N)
 
   for i in 2:N;
     H[i,i-1] = gamma;
     H[i,i]   = eps/2;
   end
-  H = H + H' ;
+  H = H + transpose(H) ;
   H[1,1] = eps;
   return H
 end
@@ -113,12 +110,12 @@ function Mat_TransmisionD(eta,decor,FGreen,k,N)
   return T
 end
 
-function Mat_Tau(eta,dcor,FGreen,N)
+function Mat_Tau(etaS,etaD,dcor,FGreen,N)
   Mtau = zeros(N,N);
   for al in 1:N
     for be in al:N
       if al==be;
-        Mtau[al,al] = diagonalTau(al,eta,dcor,FGreen,N);
+        Mtau[al,al] = diagonalTau(al,etaS,etaD,dcor,FGreen,N);
         #println(Mtau[al,al])
       else 
         Mtau[al,be] = -Calcula_transmision(dcor,dcor,FGreen,al,be);
@@ -131,7 +128,7 @@ function Mat_Tau(eta,dcor,FGreen,N)
 
 end
 
-function diagonalTau(al,eta,dcor,FGreen,N)
+function diagonalTau(al,etaS,etaD,dcor,FGreen,N)
   val = 0;
 
   for i in 1:N;
@@ -139,8 +136,8 @@ function diagonalTau(al,eta,dcor,FGreen,N)
       val = val +Calcula_transmision(dcor,dcor,FGreen,al,i)
     end
   end
-  val = val  + Calcula_transmision(eta,dcor,FGreen,al,1)
-  val = val + Calcula_transmision(eta,dcor,FGreen,al,N)
+  val = val  + Calcula_transmision(etaS,dcor,FGreen,al,1)
+  val = val + Calcula_transmision(etaD,dcor,FGreen,al,N)
   return val
 
 

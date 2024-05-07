@@ -3,9 +3,6 @@ using Random
 #using Plots
 using Distributions
 using Printf
-#
-# ESTE ARCHIVO DE UFNCIONES ESTA REVISADO Y VALIDODAO COMPARAO CON EL DE ADRIAN
-#
 
 #
 # Crea matriz tridiagonal 
@@ -13,7 +10,7 @@ using Printf
 #
 function  GeneraH(N,eps,gamma)
 
-  H = zeros(N,N)
+  H = zeros(Complex,N,N)
 
   for i in 2:N;
     H[i,i-1] = gamma;

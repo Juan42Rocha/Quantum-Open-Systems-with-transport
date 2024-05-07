@@ -1,0 +1,7 @@
+include("fun.jl")
+
+
+function SigZ(n)
+  t = Collect(-n:1:n);
+
+end

@@ -1,7 +1,7 @@
 ##
 #
 # Esto es para introducir decoherencian el sistema
-# la idea es que al con decoherencia la trasmisión del sistema
+# la idea es que al con decoherencia la trasmisiÃ³n del sistema
 # se comporta como un sistema "real" y uno un conductor  perfecto
 #
 ##
@@ -11,6 +11,7 @@ include("fun.jl")
 function main()
 Nr       = 5000;  # relizaciones
 Ninit    = 2 ;
+
 Ndim     = 30;   # Max dimension
 dcor     = 0.5;   # decore nu
 

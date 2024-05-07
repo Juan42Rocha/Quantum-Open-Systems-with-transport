@@ -1,10 +1,10 @@
 using Random
 using LinearAlgebra
-using Plots
+#using Plots
+using Printf
 
-
-function StepJump(st,gamma,dt,c)
-  dp = gamma*abs(st[1,1])^2*dt;
+function StepJump(H,st,gamma,dt,c);
+  dp = gamma*abs(st[2,1])^2*dt;
   nst = zeros(Complex,2,1);
   if  rand() < dp  ;
    # println("jump")
@@ -12,28 +12,29 @@ function StepJump(st,gamma,dt,c)
     nst = nst./norm(nst);
   else
     nst = st;
+    nst =(I(2)-1im*dt*H)*st;
   end
 
-  return nst
+  return nst;
 end
 
 
-function OneRel(st,gamma,dt,H,c,N)
+function OneRel(st,gamma,dt,H,c,N);
  # (nst,temp) = size(st);
   stT = zeros(Complex,2,N+1);
   stT[:,1] = st;
 #  println(st,stT[:,1]);
   for k in 1:N
-    stT[:,k+1] =(I(2)-1im*dt*H)*stT[:,k];
-    stT[:,k+1] = StepJump(stT[:,k+1],gamma,dt,c);
-    stT[:,k+1] =  stT[:,k+1]/norm(stT[:,k+1]);
+   # stT[:,k+1] =(I(2)-1im*dt*H)*stT[:,k];
+    stT[:,k+1] = StepJump(H,stT[:,k],gamma,dt,c);
+    stT[:,k+1] =  stT[:,k+1]./norm(stT[:,k+1]);
   end
 
-  return stT
+  return stT;
 end
 
 
-function MultiRel(st,gamma,dt,H,c,N,rel)
+function MultiRel(st,gamma,dt,H,c,N,rel);
 
   rho = zeros(Complex,4,N+1);
   stR = zeros(Complex,2,N+1);
@@ -43,18 +44,18 @@ function MultiRel(st,gamma,dt,H,c,N,rel)
 
   end 
 
-  return rho./rel
+  return rho./rel;
 
 
 end
 
 
-function makeRho(st,N)
+function makeRho(st,N);
   rho =  zeros(Complex,4,N+1);
   for k in 1:N+1;
     rho[:,k] = reshape(st[:,k]*st[:,k]',4,1);
   end
-  return rho
+  return rho;
 
 end
 
@@ -63,7 +64,7 @@ end
 function CM(A,B)
   return A*B-B*A
 end
-
+1
 function aCM(A,B)
   return A*B+B*A
 end
